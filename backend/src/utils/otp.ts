@@ -11,7 +11,9 @@ export const generateOTP=(email:string)=>{
 export const verifyOTP = (email: string, userOTP: string) => {
     const otp = otpStore.get(email);
     if (otp === userOTP) {
+       otpStore.delete(email);
         return true;
+        
     } else {
         return false;
     }
