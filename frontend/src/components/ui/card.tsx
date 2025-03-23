@@ -1,5 +1,4 @@
 import React from "react";
-import api from "../../api"; // Import your API instance
 
 interface CardProps {
   _id: string;
@@ -8,7 +7,7 @@ interface CardProps {
   type: "socialPost" | "Notes" | "video" | "document";
   image?: string;
   description?: string;
-  tags?: { title: string; _id: string }[]; // Add tags to props
+  tags?: { title: string; _id: string }[];
   onDelete: (id: string) => void;
 }
 
@@ -36,12 +35,9 @@ export const Card: React.FC<CardProps> = ({
   const youtubeID = link ? extractYouTubeID(link) : null;
 
   // Function to handle delete
-  const handleDelete = async () => {
-    try {
-      await api.delete(`/content/${_id}`); // Send DELETE request
-      onDelete(_id); // Notify parent component to update the list
-    } catch (error) {
-      console.error("Error deleting content:", error);
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to delete this content?")) {
+      onDelete(_id); // Use the provided delete handler from parent
     }
   };
 

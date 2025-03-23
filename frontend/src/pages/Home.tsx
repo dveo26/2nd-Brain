@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "../components/ui/button";
-import { Card } from "../components/ui/card";
-import AddContentForm from "../components/ui/AddContentForm";
+import ContentContainer from "../components/ui/contentContainer";
+import { useNavigate } from "react-router-dom";
 import api from "../api";
 
 // Define the ContentItem type
@@ -12,17 +12,23 @@ export interface ContentItem {
   type: "video" | "socialPost" | "Notes" | "document";
   link?: string;
   image?: string;
+  tags?: { title: string; _id: string }[];
   createdAt?: string;
   updatedAt?: string;
 }
 
 const Home: React.FC = () => {
-  const [showAddContentForm, setShowAddContentForm] = useState(false);
-  const [content, setContent] = useState<ContentItem[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
+  const [contentStats, setContentStats] = useState({
+    totalItems: 0,
+    videoCount: 0,
+    notesCount: 0,
+    documentsCount: 0,
+    socialPostCount: 0,
+  });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
-  const [username, setUsername] = useState(""); // Track username
+  const navigate = useNavigate();
 
   // Check if the user is logged in
   useEffect(() => {
@@ -31,46 +37,36 @@ const Home: React.FC = () => {
       setIsLoggedIn(true);
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       setUsername(user.username || "User");
+
+      // Fetch stats
+      fetchContentStats();
+    } else {
+      setLoading(false);
     }
   }, []);
 
-  // Fetch content from the backend
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchContent();
-    }
-  }, [isLoggedIn]);
-
-  const fetchContent = async () => {
+  // Fetch content statistics
+  const fetchContentStats = async () => {
     try {
       setLoading(true);
       const response = await api.get<ContentItem[]>("/content");
-      console.log("Backend response:", response.data);
 
       if (Array.isArray(response.data)) {
-        setContent(response.data);
-      } else {
-        setError("Invalid data format received from the server.");
-        setContent([]);
+        const items = response.data;
+        setContentStats({
+          totalItems: items.length,
+          videoCount: items.filter((item) => item.type === "video").length,
+          notesCount: items.filter((item) => item.type === "Notes").length,
+          documentsCount: items.filter((item) => item.type === "document")
+            .length,
+          socialPostCount: items.filter((item) => item.type === "socialPost")
+            .length,
+        });
       }
     } catch (error) {
-      console.error("Error fetching content:", error);
-      setError("Failed to fetch content. Please try again later.");
-      setContent([]);
+      console.error("Error fetching content stats:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Handle content deletion
-  const handleDelete = async (id: string) => {
-    try {
-      await api.delete(`/content/${id}`); // Send DELETE request to the backend
-      setContent((prevContent) =>
-        prevContent.filter((item) => item._id !== id)
-      ); // Update the state
-    } catch (error) {
-      console.error("Error deleting content:", error);
     }
   };
 
@@ -78,18 +74,27 @@ const Home: React.FC = () => {
     <div className="flex-1 flex flex-col p-6 h-screen overflow-y-auto">
       {/* Show login/signup message if not logged in */}
       {!isLoggedIn && (
-        <div className="flex items-center justify-center h-full">
-          <p className="text-2xl font-semibold text-gray-700">
-            Please{" "}
-            <a href="/login" className="text-indigo-600 hover:underline">
-              login
-            </a>{" "}
-            or{" "}
-            <a href="/signup" className="text-indigo-600 hover:underline">
-              signup
-            </a>{" "}
-            first.
+        <div className="flex flex-col items-center justify-center h-full">
+          <h1 className="text-4xl font-bold text-indigo-950 mb-4">
+            Second Brain
+          </h1>
+          <p className="text-xl text-gray-700 mb-8">
+            Your personal knowledge management system
           </p>
+          <div className="flex gap-4">
+            <Button
+              variant="primary"
+              size="lg"
+              text="Login"
+              onClick={() => navigate("/login")}
+            />
+            <Button
+              variant="secondary"
+              size="lg"
+              text="Sign Up"
+              onClick={() => navigate("/signup")}
+            />
+          </div>
         </div>
       )}
 
@@ -99,66 +104,61 @@ const Home: React.FC = () => {
           {/* Greeting Message */}
           <div className="mb-6">
             <h1 className="text-2xl font-semibold text-gray-900">
-              Hello, {username}!
+              Welcome back, {username}!
             </h1>
+            <p className="text-gray-600">Here's an overview of your content</p>
           </div>
 
-          {/* Buttons at the top-right */}
-          <div className="flex justify-end gap-4 mb-6">
-            <Button
-              variant="primary"
-              size="md"
-              text="Add Content"
-              startIcon={<span>+</span>}
-              onClick={() => setShowAddContentForm(true)}
-            />
-            <Button
-              variant="secondary"
-              size="md"
-              text="Share Brain"
-              startIcon={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  className="bi bi-share"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5m-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3" />
-                </svg>
-              }
-              onClick={() => console.log("Share Brain Clicked")}
-            />
-          </div>
-
-          {/* Display loading or error messages */}
-          {loading && <p>Loading content...</p>}
-          {error && <p className="text-red-500">{error}</p>}
-
-          {/* Render the Card component for each content item */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
-            {content.map((item) => (
-              <Card
-                key={item._id}
-                _id={item._id} // Pass the _id prop
-                title={item.title}
-                description={item.description}
-                link={item.link}
-                type={item.type}
-                image={item.image}
-                onDelete={handleDelete} // Pass the handleDelete function
-              />
-            ))}
-          </div>
-
-          {/* Show the Add Content Form */}
-          {showAddContentForm && (
-            <AddContentForm
-              onClose={() => setShowAddContentForm(false)}
-              onContentAdded={fetchContent} // Refresh content after adding
-            />
+          {/* Content Statistics */}
+          {loading ? (
+            <div className="flex justify-center my-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-800"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-indigo-100 rounded-lg p-4 shadow-sm">
+                <h3 className="text-lg font-medium text-indigo-950">
+                  Total Content
+                </h3>
+                <p className="text-3xl font-bold text-indigo-800">
+                  {contentStats.totalItems}
+                </p>
+              </div>
+              <div
+                className="bg-blue-100 rounded-lg p-4 shadow-sm cursor-pointer hover:bg-blue-200"
+                onClick={() => navigate("/video")}
+              >
+                <h3 className="text-lg font-medium text-blue-950">Videos</h3>
+                <p className="text-3xl font-bold text-blue-800">
+                  {contentStats.videoCount}
+                </p>
+              </div>
+              <div
+                className="bg-amber-100 rounded-lg p-4 shadow-sm cursor-pointer hover:bg-amber-200"
+                onClick={() => navigate("/notes")}
+              >
+                <h3 className="text-lg font-medium text-amber-950">Notes</h3>
+                <p className="text-3xl font-bold text-amber-800">
+                  {contentStats.notesCount}
+                </p>
+              </div>
+              <div
+                className="bg-violet-100 rounded-lg p-4 shadow-sm cursor-pointer hover:bg-violet-200"
+                onClick={() => navigate("/content")}
+              >
+                <h3 className="text-lg font-medium text-violet-950">
+                  All Content
+                </h3>
+                <p className="text-3xl font-bold text-violet-800">View All →</p>
+              </div>
+            </div>
           )}
+
+          {/* Recent Content */}
+          <div className="mt-4">
+            <h2 className="text-xl font-semibold mb-4">Recent Content</h2>
+            <ContentContainer activeFilter={null} />
+          </div>
         </>
       )}
     </div>

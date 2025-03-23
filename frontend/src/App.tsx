@@ -3,75 +3,90 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  useLocation,
+  Navigate,
 } from "react-router-dom";
-import Signup from "./pages/signup";
-import Login from "./pages/login";
-import Home from "./pages/Home";
 import { Sidebar } from "./components/ui/sidebar";
+import ContentContainer from "./components/ui/contentContainer";
+import Login from "./pages/login";
+import Signup from "./pages/signup";
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [activeContentType, setActiveContentType] = useState<string | null>(
+    null
+  );
 
-  // Check if the user is authenticated on initial load
+  // Check if user is authenticated on app load
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      setIsAuthenticated(true); // User is authenticated
+      setIsAuthenticated(true);
+
+      // Verify token validity with backend (optional)
+      // api.get("/auth/verify").catch(() => {
+      //   localStorage.removeItem("token");
+      //   localStorage.removeItem("user");
+      //   setIsAuthenticated(false);
+      // });
     }
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Remove the token
-    setIsAuthenticated(false); // Update authentication state
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsAuthenticated(false);
+    // Reset content type when logging out
+    setActiveContentType(null);
+  };
+
+  const handleFilterChange = (type: string | null) => {
+    setActiveContentType(type);
   };
 
   return (
     <Router>
-      <AppContent
-        isAuthenticated={isAuthenticated}
-        setIsAuthenticated={setIsAuthenticated}
-        onLogout={handleLogout}
-      />
-    </Router>
-  );
-};
+      <div className="flex h-screen bg-gray-50">
+        {/* Sidebar */}
+        <Sidebar
+          isAuthenticated={isAuthenticated}
+          onLogout={handleLogout}
+          activeContentType={activeContentType}
+          onFilterChange={handleFilterChange}
+        />
 
-const AppContent: React.FC<{
-  isAuthenticated: boolean;
-  setIsAuthenticated: (value: boolean) => void;
-  onLogout: () => void;
-}> = ({ isAuthenticated, setIsAuthenticated, onLogout }) => {
-  const location = useLocation();
-
-  // Define routes where the Sidebar should NOT appear
-  const noSidebarRoutes = ["/login", "/signup"];
-
-  // Check if the current route is in the noSidebarRoutes list
-  const showSidebar = !noSidebarRoutes.includes(location.pathname);
-
-  return (
-    <div className="flex bg-white">
-      {/* Conditionally render the Sidebar */}
-      {showSidebar && (
-        <Sidebar isAuthenticated={isAuthenticated} onLogout={onLogout} />
-      )}
-
-      {/* Main Content - Scrollable */}
-      <div className={`flex-1 ${showSidebar ? "ml-64" : ""}`}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route
-            path="/signup"
-            element={<Signup setIsAuthenticated={setIsAuthenticated} />}
-          />
-          <Route
-            path="/login"
-            element={<Login setIsAuthenticated={setIsAuthenticated} />}
-          />
-        </Routes>
+        {/* Main Content */}
+        <div className="flex-1 ml-64 p-6 overflow-y-auto">
+          <Routes>
+            <Route
+              path="/"
+              element={<ContentContainer activeFilter={activeContentType} />}
+            />
+            <Route
+              path="/login"
+              element={
+                isAuthenticated ? (
+                  <Navigate to="/" />
+                ) : (
+                  <Login setIsAuthenticated={setIsAuthenticated} />
+                )
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                isAuthenticated ? (
+                  <Navigate to="/" />
+                ) : (
+                  <Signup setIsAuthenticated={setIsAuthenticated} />
+                )
+              }
+            />
+            {/* Redirect any unknown paths to home */}
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </div>
       </div>
-    </div>
+    </Router>
   );
 };
 

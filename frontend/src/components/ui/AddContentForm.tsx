@@ -138,13 +138,12 @@ const AddContentForm: React.FC<AddContentFormProps> = ({
                 className="w-full p-2 border rounded-l"
                 placeholder="Add a tag"
               />
-              <button
-                type="button"
+              <Button
+                variant="primary"
+                size="md"
+                text="Add"
                 onClick={handleAddTag}
-                className="bg-blue-500 text-white px-4 rounded-r"
-              >
-                Add
-              </button>
+              />
             </div>
 
             {/* Display tags */}
