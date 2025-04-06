@@ -31,7 +31,7 @@ const Login: React.FC<{ setIsAuthenticated: (value: boolean) => void }> = ({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-violet-50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br  from-slate-900 to-indigo-950">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-bold mb-6 text-indigo-950">Login</h2>
         {error && <p className="text-red-500 mb-4">{error}</p>}

@@ -1,5 +1,6 @@
 import React from "react";
 import clsx from "clsx";
+import { motion } from "framer-motion";
 
 export interface ButtonProps {
   variant: "primary" | "secondary";
@@ -8,7 +9,8 @@ export interface ButtonProps {
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
   onClick?: () => void;
-  type?: "button" | "submit" | "reset"; // Add type prop
+  type?: "button" | "submit" | "reset";
+  disabled?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -18,30 +20,36 @@ export const Button: React.FC<ButtonProps> = ({
   startIcon,
   endIcon,
   onClick,
-  type = "button", // Default to "button"
+  type = "button",
+  disabled = false,
 }) => {
   return (
-    <button
-      type={type} // Pass the type prop to the button element
+    <motion.button
+      type={type}
       onClick={onClick}
+      disabled={disabled}
+      whileHover={{ scale: disabled ? 1 : 1.03 }}
+      whileTap={{ scale: disabled ? 1 : 0.97 }}
+      transition={{ duration: 0.2 }}
       className={clsx(
-        "flex items-center justify-center gap-2 font-semibold rounded-md transition duration-200 hover:scale-105",
+        "flex items-center justify-center gap-2 font-medium rounded-md transition-all duration-200",
         {
-          "bg-indigo-950 text-white hover:bg-indigo-800 transition-transform":
-            variant === "primary",
-          "bg-violet-200 text-indigo-950 hover:bg-violet-300 transition-transform":
-            variant === "secondary",
+          "bg-gradient-to-r from-indigo-900 to-indigo-800 text-white shadow-md hover:shadow-lg":
+            variant === "primary" && !disabled,
+          "bg-gradient-to-r from-violet-200 to-indigo-100 text-indigo-900 shadow-sm hover:shadow":
+            variant === "secondary" && !disabled,
+          "bg-gray-300 text-gray-500 cursor-not-allowed": disabled,
         },
         {
-          "px-3 py-1 text-sm": size === "sm",
+          "px-3 py-1.5 text-sm": size === "sm",
           "px-4 py-2 text-base": size === "md",
-          "px-5 py-3 text-lg": size === "lg",
+          "px-6 py-3 text-lg": size === "lg",
         }
       )}
     >
-      {startIcon && <span>{startIcon}</span>}
-      {text}
-      {endIcon && <span>{endIcon}</span>}
-    </button>
+      {startIcon && <span className="animate-fadeIn">{startIcon}</span>}
+      <span>{text}</span>
+      {endIcon && <span className="animate-fadeIn">{endIcon}</span>}
+    </motion.button>
   );
 };

@@ -74,19 +74,30 @@ export const Card: React.FC<CardProps> = ({
       case "socialPost":
         if (link) {
           return (
-            <div className="mt-2">
+            <div className="w-full h-60 overflow-hidden rounded-lg border flex items-center justify-center">
               {image ? (
                 <img
                   src={image}
                   alt="Social Post"
-                  className="w-full h-48 object-cover rounded-lg"
+                  className="max-w-full max-h-full object-scale-down"
+                  onLoad={(e) => {
+                    const img = e.currentTarget;
+                    console.log(
+                      `Image loaded: ${img.naturalWidth}x${img.naturalHeight}`
+                    );
+                  }}
+                  onError={(e) => {
+                    console.error("Image failed to load", e);
+                  }}
                 />
               ) : (
                 <iframe
                   src={link}
                   title="Embedded Article"
-                  className="w-full h-48 rounded-lg border"
-                ></iframe>
+                  className="w-full h-full overflow-hidden"
+                  style={{ aspectRatio: "auto" }}
+                  scrolling="no"
+                />
               )}
             </div>
           );
@@ -114,7 +125,7 @@ export const Card: React.FC<CardProps> = ({
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg border border-gray-200 max-w-80 max-h-96 transition-all duration-300 transform hover:shadow-lg hover:scale-105 overflow-y-auto relative">
+    <div className="p-4 bg-gray-100 rounded-lg border border-gray-200 max-w-80 max-h-96 transition-all duration-300 transform hover:shadow-lg hover:scale-105 overflow-y-auto relative">
       {/* Delete Icon */}
       <button
         onClick={handleDelete}
@@ -223,7 +234,7 @@ export const Card: React.FC<CardProps> = ({
 
       {/* Render Description */}
       {description && (
-        <p className="text-sm text-gray-700 mt-3 mb-3">{description}</p>
+        <p className="text-md text-black mt-3 mb-3">{description}</p>
       )}
 
       {/* Display Tags with # */}
@@ -232,7 +243,7 @@ export const Card: React.FC<CardProps> = ({
           {tags.map((tag) => (
             <span
               key={tag._id}
-              className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+              className="bg-violet-100 text-violet-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
             >
               #{tag.title}
             </span>

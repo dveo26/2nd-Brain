@@ -18,8 +18,6 @@ interface ContentContainerProps {
   activeFilter: string | null;
 }
 
-
-
 const ContentContainer: React.FC<ContentContainerProps> = ({
   activeFilter,
 }) => {
@@ -28,17 +26,19 @@ const ContentContainer: React.FC<ContentContainerProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
 
   // Check if the user is logged in
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       setIsLoggedIn(true);
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-      setUsername(user.username || "User");
+    } else {
+      // If no token, explicitly set logged out state
+      setIsLoggedIn(false);
+      setContents([]);
+      setIsLoading(false);
     }
-  }, [username]);
+  }, []);
 
   // Function to fetch all content
   const fetchContent = React.useCallback(async () => {
@@ -89,7 +89,7 @@ const ContentContainer: React.FC<ContentContainerProps> = ({
 
   // Function to get the title based on active filter
   const getContentTitle = () => {
-    if (!activeFilter) return "All Content";
+    if (!activeFilter) return "";
     switch (activeFilter) {
       case "video":
         return "Videos";
@@ -109,11 +109,11 @@ const ContentContainer: React.FC<ContentContainerProps> = ({
       <div className="flex items-center justify-center h-full">
         <p className="text-2xl font-semibold text-gray-700">
           Please{" "}
-          <a href="/login" className="text-indigo-600 hover:underline">
+          <a href="/login" className="text-indigo-900 hover:underline">
             login
           </a>{" "}
           or{" "}
-          <a href="/signup" className="text-indigo-600 hover:underline">
+          <a href="/signup" className="text-indigo-900 hover:underline">
             signup
           </a>{" "}
           first.
@@ -123,32 +123,34 @@ const ContentContainer: React.FC<ContentContainerProps> = ({
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6 bg-gradient-to-b ">
       {/* Header with Add button */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">{getContentTitle()}</h1>
-        <Button
-          variant="primary"
-          size="md"
-          text="Add Content"
-          onClick={() => setShowAddForm(true)}
-          startIcon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="size-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 4.5v15m7.5-7.5h-15"
-              />
-            </svg>
-          }
-        />
+        <div className="flex items-center space-x-4">
+          <Button
+            variant="primary"
+            size="md"
+            text="Add Content"
+            onClick={() => setShowAddForm(true)}
+            startIcon={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="size-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4.5v15m7.5-7.5h-15"
+                />
+              </svg>
+            }
+          />
+        </div>
       </div>
 
       {/* Loading and error states */}

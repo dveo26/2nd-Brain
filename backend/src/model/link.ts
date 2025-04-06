@@ -17,5 +17,5 @@ const LinkSchema: mongoose.Schema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Explicitly set the collection name to "links"
+
 export default mongoose.model<ILink>("Link", LinkSchema, "links");

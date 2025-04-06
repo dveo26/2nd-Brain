@@ -3,14 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 
 export interface SidebarProps {
   isAuthenticated: boolean;
-  onLogout: () => void;
+  
   activeContentType: string | null;
   onFilterChange: (type: string | null) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   isAuthenticated,
-  onLogout,
+
   activeContentType,
   onFilterChange,
 }) => {
@@ -22,33 +22,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-64 bg-gradient-to-b from-indigo-950 to-violet-900 text-white p-6 shadow-lg">
-      <svg
-        className="w-[43px] h-[43px] text-gray-800 dark:text-white"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M12 18.5A2.493 2.493 0 0 1 7.51 20H7.5a2.468 2.468 0 0 1-2.4-3.154 2.98 2.98 0 0 1-.85-5.274 2.468 2.468 0 0 1 .92-3.182 2.477 2.477 0 0 1 1.876-3.344 2.5 2.5 0 0 1 3.41-1.856A2.5 2.5 0 0 1 12 5.5m0 13v-13m0 13a2.493 2.493 0 0 0 4.49 1.5h.01a2.468 2.468 0 0 0 2.403-3.154 2.98 2.98 0 0 0 .847-5.274 2.468 2.468 0 0 0-.921-3.182 2.477 2.477 0 0 0-1.875-3.344A2.5 2.5 0 0 0 14.5 3 2.5 2.5 0 0 0 12 5.5m-8 5a2.5 2.5 0 0 1 3.48-2.3m-.28 8.551a3 3 0 0 1-2.953-5.185M20 10.5a2.5 2.5 0 0 0-3.481-2.3m.28 8.551a3 3 0 0 0 2.954-5.185"
-        />
-      </svg>
-
-      <h1 className="text-2xl font-bold mb-8 text-violet-200">Second Brain</h1>
-
+    <div className="fixed left-0 top-0 h-screen w-64 bg-gradient-to-b from-indigo-950 to-slate-950 text-white p-6 shadow-lg">
+      <div className="flex items-center jutify-center px-4 ">
+        <svg
+          className="w-[43px] h-[43px] text-gray-800 dark:text-white"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M12 18.5A2.493 2.493 0 0 1 7.51 20H7.5a2.468 2.468 0 0 1-2.4-3.154 2.98 2.98 0 0 1-.85-5.274 2.468 2.468 0 0 1 .92-3.182 2.477 2.477 0 0 1 1.876-3.344 2.5 2.5 0 0 1 3.41-1.856A2.5 2.5 0 0 1 12 5.5m0 13v-13m0 13a2.493 2.493 0 0 0 4.49 1.5h.01a2.468 2.468 0 0 0 2.403-3.154 2.98 2.98 0 0 0 .847-5.274 2.468 2.468 0 0 0-.921-3.182 2.477 2.477 0 0 0-1.875-3.344A2.5 2.5 0 0 0 14.5 3 2.5 2.5 0 0 0 12 5.5m-8 5a2.5 2.5 0 0 1 3.48-2.3m-.28 8.551a3 3 0 0 1-2.953-5.185M20 10.5a2.5 2.5 0 0 0-3.481-2.3m.28 8.551a3 3 0 0 0 2.954-5.185"
+          />
+        </svg>
+      </div>
+      <h1 className="text-2xl font-bold mb-8 flex items-center text-white">
+        Second Brain
+      </h1>
       {/* Navigation Links */}
       <nav className="space-y-4">
         {/* Home */}
         <Link
           to="/"
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-violet-800 transition-colors"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-950 transition-colors"
+          onClick={() => handleContentTypeClick(null)}
         >
           <svg
             className="w-6 h-6 text-gray-800 dark:text-white"
@@ -73,46 +76,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Content Type Filters (Only if authenticated) */}
         {isAuthenticated && (
           <>
-            <div className="mt-4 mb-2 text-sm text-violet-300 font-medium">
+            <div className="mt-4 mb-2 text-sm text-white font-medium">
               Content Types
             </div>
 
-            {/* All Content */}
-            <button
-              onClick={() => handleContentTypeClick(null)}
-              className={`flex items-center gap-3 p-3 rounded-lg transition-colors w-full text-left ${
-                activeContentType === null
-                  ? "bg-violet-800"
-                  : "hover:bg-violet-800"
-              }`}
-            >
-              <svg
-                className="w-6 h-6 text-gray-800 dark:text-white"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 19V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2Z"
-                />
-              </svg>
-              <span>All Content</span>
-            </button>
+           
 
             {/* Videos */}
             <button
               onClick={() => handleContentTypeClick("video")}
               className={`flex items-center gap-3 p-3 rounded-lg transition-colors w-full text-left ${
                 activeContentType === "video"
-                  ? "bg-violet-800"
-                  : "hover:bg-violet-800"
+                  ? "bg-slate-900 opacity-80"
+                  : "hover:bg-indigo-950"
               }`}
             >
               <svg
@@ -140,8 +116,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               onClick={() => handleContentTypeClick("socialPost")}
               className={`flex items-center gap-3 p-3 rounded-lg transition-colors w-full text-left ${
                 activeContentType === "socialPost"
-                  ? "bg-violet-800"
-                  : "hover:bg-violet-800"
+                  ? "bg-slate-900 opacity-80"
+                  : "hover:bg-indigo-950"
               }`}
             >
               <svg
@@ -169,8 +145,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               onClick={() => handleContentTypeClick("Notes")}
               className={`flex items-center gap-3 p-3 rounded-lg transition-colors w-full text-left ${
                 activeContentType === "Notes"
-                  ? "bg-violet-800"
-                  : "hover:bg-violet-800"
+                  ? "bg-slate-900 opacity-80"
+                  : "hover:bg-indigo-950"
               }`}
             >
               <svg
@@ -198,8 +174,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               onClick={() => handleContentTypeClick("document")}
               className={`flex items-center gap-3 p-3 rounded-lg transition-colors w-full text-left ${
                 activeContentType === "document"
-                  ? "bg-violet-800"
-                  : "hover:bg-violet-800"
+                  ? "bg-slate-900 opacity-80"
+                  : "hover:bg-indigo-950"
               }`}
             >
               <svg
@@ -224,15 +200,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </>
         )}
       </nav>
-
       {/* Authentication Buttons */}
-      <div className="mt-8 border-t border-violet-800 pt-6">
+      <div className="mt-8 border-t border-slate-950 pt-6">
         {!isAuthenticated ? (
           <>
             {/* Signup */}
             <Link
               to="/signup"
-              className="flex items-center gap-3 p-3 rounded-lg hover:bg-violet-800 transition-colors w-full"
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-950 transition-colors w-full"
             >
               <span>Signup</span>
             </Link>
@@ -240,19 +215,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Login */}
             <Link
               to="/login"
-              className="flex items-center gap-3 p-3 rounded-lg hover:bg-violet-800 transition-colors w-full"
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-950 transition-colors w-full"
             >
               <span>Login</span>
             </Link>
           </>
         ) : (
-          /* Logout */
-          <button
-            onClick={onLogout}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-violet-800 transition-colors w-full"
-          >
-            <span>Logout</span>
-          </button>
+          <>
+            
+          </>
         )}
       </div>
     </div>
