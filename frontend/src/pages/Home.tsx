@@ -18,15 +18,20 @@ export interface ContentItem {
   updatedAt?: string;
 }
 
-const Home: React.FC = () => {
+interface HomeProps {
+  activeContentType?: string | null;
+  setActiveContentType?: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+const Home: React.FC<HomeProps> = ({
+  activeContentType,
+  setActiveContentType,
+}) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const [contentStats, setContentStats] = useState({
     totalItems: 0,
   });
-  const [activeContentType, setActiveContentType] = useState<string | null>(
-    null
-  );
   const [loading, setLoading] = useState(true);
   const [shareLoading, setShareLoading] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
@@ -97,30 +102,17 @@ const Home: React.FC = () => {
       totalItems: 0,
     });
 
-    navigate("/login");
+    // Force a navigation and page refresh
+    window.location.href = "/";
+    // Don't use navigate() here as it won't refresh the page state
   };
 
-  // Handle content type filter
+  // Handle content type filter - updated to use the prop from App.tsx
   const handleFilterChange = (type: string | null) => {
-    setActiveContentType(type);
+    if (setActiveContentType) {
+      setActiveContentType(type);
+    }
   };
-
-  // Example usage of handleFilterChange
-  // Add a button to test the filter change functionality
-  <motion.div className="flex gap-4" variants={itemVariants}>
-    <Button
-      variant="secondary"
-      size="sm"
-      text="Filter Videos"
-      onClick={() => handleFilterChange("video")}
-    />
-    <Button
-      variant="secondary"
-      size="sm"
-      text="Clear Filter"
-      onClick={() => handleFilterChange(null)}
-    />
-  </motion.div>;
 
   // Handle share brain functionality
   const handleShareBrain = async () => {
@@ -230,13 +222,13 @@ const Home: React.FC = () => {
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
-                    stroke-width="1.5"
+                    strokeWidth="1.5"
                     stroke="currentColor"
                     className="size-6"
                   >
                     <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                       d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"
                     />
                   </svg>
@@ -300,7 +292,7 @@ const Home: React.FC = () => {
 
           {/* Content Container */}
           <motion.div variants={itemVariants}>
-            <ContentContainer activeFilter={activeContentType} />
+            <ContentContainer activeFilter={activeContentType ?? null} />
           </motion.div>
         </>
       )}

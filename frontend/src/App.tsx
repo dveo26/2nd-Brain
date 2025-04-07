@@ -7,7 +7,6 @@ import {
   useLocation,
 } from "react-router-dom";
 import { Sidebar } from "./components/ui/sidebar";
-import ContentContainer from "./components/ui/contentContainer";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import Home from "./pages/Home";
@@ -21,12 +20,23 @@ const AnimatedRoutes = () => {
     null
   );
 
-  // Check if user is authenticated on app load
+  // Check for authentication token on component mount
+  // In App.tsx, modify the AnimatedRoutes component:
+
+  // Check if user is authenticated with a dependency on localStorage
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      setIsAuthenticated(true);
-    }
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      setIsAuthenticated(!!token);
+    };
+
+    checkAuth();
+
+    // This will help when token changes
+    window.addEventListener("storage", checkAuth);
+    return () => {
+      window.removeEventListener("storage", checkAuth);
+    };
   }, []);
 
   const isAuthPage = ["/login", "/signup"].includes(location.pathname);
@@ -45,6 +55,7 @@ const AnimatedRoutes = () => {
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Sidebar - Only show if authenticated and not on auth pages */}
+
       {isAuthenticated && !isAuthPage && (
         <motion.div
           initial={{ x: -300, opacity: 0 }}
@@ -56,10 +67,10 @@ const AnimatedRoutes = () => {
             isAuthenticated={isAuthenticated}
             activeContentType={activeContentType}
             onFilterChange={handleFilterChange}
+            onLogout={handleLogout} // Add this prop
           />
         </motion.div>
       )}
-
       {/* Main Content */}
       <motion.div
         className={`flex-1 ${
@@ -79,10 +90,14 @@ const AnimatedRoutes = () => {
             className="h-full"
           >
             <Routes location={location}>
-              <Route path="/" element={<Home />} />
               <Route
-                path="/content"
-                element={<ContentContainer activeFilter={activeContentType} />}
+                path="/"
+                element={
+                  <Home
+                    activeContentType={activeContentType}
+                    setActiveContentType={setActiveContentType}
+                  />
+                }
               />
               <Route
                 path="/login"
@@ -105,7 +120,7 @@ const AnimatedRoutes = () => {
                 }
               />
               <Route path="/shared/:hash" element={<SharedContent />} />
-              <Route path="*" element={<Navigate to="/" />} />
+              <Route path="" element={<Navigate to="/" />} />
             </Routes>
           </motion.div>
         </AnimatePresence>

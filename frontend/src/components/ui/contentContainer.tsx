@@ -27,7 +27,7 @@ const ContentContainer: React.FC<ContentContainerProps> = ({
   const [showAddForm, setShowAddForm] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Check if the user is logged in
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -40,7 +40,7 @@ const ContentContainer: React.FC<ContentContainerProps> = ({
     }
   }, []);
 
-  // Function to fetch all content
+
   const fetchContent = React.useCallback(async () => {
     if (!isLoggedIn) return;
 

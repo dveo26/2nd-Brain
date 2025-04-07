@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 interface CardProps {
   _id: string;
@@ -22,6 +22,16 @@ const extractYouTubeID = (url: string) => {
   return match ? match[1] : null;
 };
 
+// Function to check if image URL is valid before rendering
+const preloadImage = (src: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = src;
+  });
+};
+
 export const Card: React.FC<CardProps> = ({
   _id,
   title,
@@ -33,12 +43,107 @@ export const Card: React.FC<CardProps> = ({
   onDelete,
 }) => {
   const youtubeID = link ? extractYouTubeID(link) : null;
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(image || null);
+
+  // Pre-check if the image is valid when component mounts or image URL changes
+  useEffect(() => {
+    if (image) {
+      setImageLoaded(false);
+      preloadImage(image).then((success) => {
+        if (!success) {
+          console.error("Failed to load image:", image);
+          setImageError(true);
+          // Try with CORS proxy if direct loading fails
+          if (image.startsWith("https://")) {
+            // Replace with your CORS proxy if available
+            const proxyUrl = `https://cors-anywhere.herokuapp.com/${image}`;
+            return preloadImage(proxyUrl).then((proxySuccess) => {
+              if (proxySuccess) {
+                setImageUrl(proxyUrl);
+                setImageError(false);
+              }
+            });
+          }
+        } else {
+          setImageError(false);
+        }
+      });
+    }
+  }, [image]);
 
   // Function to handle delete
-  const handleDelete = () => {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering card click
     if (window.confirm("Are you sure you want to delete this content?")) {
-      onDelete(_id); // Use the provided delete handler from parent
+      onDelete(_id);
     }
+  };
+
+  // Function to handle card click
+  const handleCardClick = () => {
+    if (link) {
+      window.open(link, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  // Function to handle image error
+  const handleImageError = () => {
+    console.error("Image failed to load:", image);
+    setImageError(true);
+    setImageLoaded(false);
+  };
+
+  // Get domain from URL for placeholder
+  const getDomainFromUrl = (url?: string) => {
+    if (!url) return "";
+    try {
+      const domain = new URL(url).hostname.replace("www.", "");
+      return domain.split(".")[0].charAt(0).toUpperCase();
+    } catch (e) {
+      return "";
+    }
+  };
+
+  // Function to render image with fallback
+  const renderImage = () => {
+    if (!imageUrl || imageError) {
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg">
+          <div className="text-center p-4">
+            <div className="bg-gray-200 rounded-full w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+              <span className="text-gray-500 text-xl font-semibold">
+                {getDomainFromUrl(link) || title.charAt(0)}
+              </span>
+            </div>
+            <p className="text-sm text-gray-500">Image unavailable</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="relative w-full h-full">
+        {!imageLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+          </div>
+        )}
+        <img
+          src={imageUrl}
+          alt={title}
+          className={`w-full h-full object-contain transition-opacity duration-300 ${
+            imageLoaded ? "opacity-100" : "opacity-0"
+          }`}
+          onLoad={() => setImageLoaded(true)}
+          onError={handleImageError}
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+          loading="lazy"
+        />
+      </div>
+    );
   };
 
   // Function to render content based on type
@@ -48,57 +153,64 @@ export const Card: React.FC<CardProps> = ({
         if (link) {
           if (youtubeID) {
             return (
-              <iframe
-                width="100%"
-                height="200"
-                src={`https://www.youtube.com/embed/${youtubeID}`}
-                title="YouTube Video"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="rounded-lg"
-              ></iframe>
+              <div className="aspect-video w-full overflow-hidden rounded-lg">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={`https://www.youtube.com/embed/${youtubeID}`}
+                  title="YouTube Video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="rounded-lg"
+                  loading="lazy"
+                ></iframe>
+              </div>
             );
           }
           if (isVideoFile(link)) {
             return (
-              <video controls className="w-full rounded-lg">
-                <source src={link} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+              <div className="aspect-video w-full overflow-hidden rounded-lg">
+                <video
+                  controls
+                  className="w-full h-full object-cover rounded-lg"
+                  onError={(e) => console.error("Video failed to load:", e)}
+                >
+                  <source src={link} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
             );
           }
+        }
+        if (imageUrl) {
+          return (
+            <div className="aspect-video w-full overflow-hidden rounded-lg">
+              {renderImage()}
+            </div>
+          );
         }
         break;
 
       case "socialPost":
-        if (link) {
+        if (imageUrl) {
           return (
-            <div className="w-full h-60 overflow-hidden rounded-lg border flex items-center justify-center">
-              {image ? (
-                <img
-                  src={image}
-                  alt="Social Post"
-                  className="max-w-full max-h-full object-scale-down"
-                  onLoad={(e) => {
-                    const img = e.currentTarget;
-                    console.log(
-                      `Image loaded: ${img.naturalWidth}x${img.naturalHeight}`
-                    );
-                  }}
-                  onError={(e) => {
-                    console.error("Image failed to load", e);
-                  }}
-                />
-              ) : (
-                <iframe
-                  src={link}
-                  title="Embedded Article"
-                  className="w-full h-full overflow-hidden"
-                  style={{ aspectRatio: "auto" }}
-                  scrolling="no"
-                />
-              )}
+            <div className="w-full aspect-video overflow-hidden rounded-lg bg-gray-50">
+              {renderImage()}
+            </div>
+          );
+        } else if (link) {
+          return (
+            <div className="w-full aspect-video overflow-hidden rounded-lg border bg-gray-50">
+              <iframe
+                src={link}
+                title="Embedded Article"
+                className="w-full h-full border-0"
+                loading="lazy"
+                sandbox="allow-scripts allow-same-origin"
+                referrerPolicy="no-referrer"
+                onError={(e) => console.error("iFrame failed to load:", e)}
+              />
             </div>
           );
         }
@@ -107,38 +219,87 @@ export const Card: React.FC<CardProps> = ({
       case "document":
         if (link) {
           return (
-            <iframe
-              src={link}
-              title="PDF Document"
-              className="w-full h-60 rounded-lg border"
-            ></iframe>
+            <div className="w-full aspect-[4/3] overflow-hidden rounded-lg">
+              <iframe
+                src={link}
+                title="PDF Document"
+                className="w-full h-full rounded-lg border"
+                loading="lazy"
+                onError={(e) => console.error("Document failed to load:", e)}
+              ></iframe>
+            </div>
+          );
+        } else if (imageUrl) {
+          return (
+            <div className="w-full aspect-[4/3] overflow-hidden rounded-lg">
+              {renderImage()}
+            </div>
           );
         }
         break;
 
       case "Notes":
       default:
-      // Do nothing, description will be rendered below
+        if (imageUrl) {
+          return (
+            <div className="relative w-full aspect-video overflow-hidden rounded-lg bg-gray-50">
+              {renderImage()}
+            </div>
+          );
+        }
     }
 
     return null;
   };
 
+  // Function to get accent color based on type
+  const getTypeColor = () => {
+    switch (type) {
+      case "video":
+        return "blue";
+      case "socialPost":
+        return "green";
+      case "Notes":
+        return "amber";
+      case "document":
+        return "purple";
+      default:
+        return "gray";
+    }
+  };
+
+  // Truncate description if it's too long
+  const truncatedDescription =
+    description && description.length > 150
+      ? `${description.substring(0, 150)}...`
+      : description;
+
   return (
-    <div className="p-4 bg-gray-100 rounded-lg border border-gray-200 max-w-80 max-h-96 transition-all duration-300 transform hover:shadow-lg hover:scale-105 overflow-y-auto relative">
+    <div
+      className={`relative p-5 bg-white rounded-xl border border-gray-200 shadow-sm max-w-80 h-auto transition-all duration-300 transform hover:shadow-lg hover:translate-y-[-2px] overflow-hidden group ${
+        link ? "cursor-pointer" : ""
+      }`}
+      onClick={link ? handleCardClick : undefined}
+    >
+      {/* Top accent bar based on type */}
+      <div
+        className={`absolute top-0 left-0 right-0 h-1 bg-${getTypeColor()}-500 rounded-t-xl`}
+        aria-hidden="true"
+      />
+
       {/* Delete Icon */}
       <button
         onClick={handleDelete}
-        className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
+        className="absolute top-3 right-3 p-1.5 rounded-full bg-white/80 shadow-sm border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-gray-100"
         aria-label="Delete content"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
-          strokeWidth="1.5"
+          strokeWidth="1.75"
           stroke="currentColor"
-          className="size-5 text-gray-500 hover:text-red-500"
+          className="size-4 text-gray-600 hover:text-red-600"
         >
           <path
             strokeLinecap="round"
@@ -149,15 +310,15 @@ export const Card: React.FC<CardProps> = ({
       </button>
 
       {/* Header with Icon & Title */}
-      <div className="flex items-center mb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center mb-4">
+        <div className="flex items-center gap-2.5">
           {type === "video" && (
-            <span className="text-blue-500">
+            <span className="text-blue-600 bg-blue-50 p-1.5 rounded-lg">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                strokeWidth="1.5"
+                strokeWidth="2"
                 stroke="currentColor"
                 className="size-5"
               >
@@ -170,12 +331,12 @@ export const Card: React.FC<CardProps> = ({
             </span>
           )}
           {type === "socialPost" && (
-            <span className="text-green-500">
+            <span className="text-green-600 bg-green-50 p-1.5 rounded-lg">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                strokeWidth="1.5"
+                strokeWidth="2"
                 stroke="currentColor"
                 className="size-5"
               >
@@ -188,12 +349,12 @@ export const Card: React.FC<CardProps> = ({
             </span>
           )}
           {type === "Notes" && (
-            <span className="text-amber-500">
+            <span className="text-amber-600 bg-amber-50 p-1.5 rounded-lg">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                strokeWidth="1.5"
+                strokeWidth="2"
                 stroke="currentColor"
                 className="size-5"
               >
@@ -206,12 +367,12 @@ export const Card: React.FC<CardProps> = ({
             </span>
           )}
           {type === "document" && (
-            <span className="text-purple-500">
+            <span className="text-purple-600 bg-purple-50 p-1.5 rounded-lg">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                strokeWidth="1.5"
+                strokeWidth="2"
                 stroke="currentColor"
                 className="size-5"
               >
@@ -230,24 +391,48 @@ export const Card: React.FC<CardProps> = ({
       </div>
 
       {/* Render Content */}
-      {renderContent()}
+      <div className="mb-4">{renderContent()}</div>
 
       {/* Render Description */}
-      {description && (
-        <p className="text-md text-black mt-3 mb-3">{description}</p>
+      {truncatedDescription && (
+        <p className="text-sm text-gray-700 mt-3 mb-4 line-clamp-3">
+          {truncatedDescription}
+        </p>
       )}
 
       {/* Display Tags with # */}
       {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-3">
+        <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
           {tags.map((tag) => (
             <span
               key={tag._id}
-              className="bg-violet-100 text-violet-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+              className="bg-violet-100 text-violet-700 text-xs font-medium px-2.5 py-1 rounded-full"
             >
               #{tag.title}
             </span>
           ))}
+        </div>
+      )}
+
+      {/* Link indicator (if card is clickable) */}
+      {link && (
+        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-violet-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+              stroke="currentColor"
+              className="size-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+              />
+            </svg>
+          </span>
         </div>
       )}
     </div>

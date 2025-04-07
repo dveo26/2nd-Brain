@@ -3,16 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 
 export interface SidebarProps {
   isAuthenticated: boolean;
-  
   activeContentType: string | null;
   onFilterChange: (type: string | null) => void;
+  onLogout: () => void; // Added logout handler prop
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   isAuthenticated,
-
   activeContentType,
   onFilterChange,
+
 }) => {
   const navigate = useNavigate();
 
@@ -79,8 +79,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="mt-4 mb-2 text-sm text-white font-medium">
               Content Types
             </div>
-
-           
 
             {/* Videos */}
             <button
