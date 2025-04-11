@@ -104,6 +104,14 @@ const Signup: React.FC<{ setIsAuthenticated: (value: boolean) => void }> = ({
               />
             )}
           </div>
+          <div className="mt-4 text-center">
+            <p className="text-gray-600">
+              already have an account?{" "}
+              <a href="/login" className="text-indigo-600 hover:underline">
+                login
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>

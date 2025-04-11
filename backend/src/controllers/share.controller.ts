@@ -10,9 +10,7 @@ export const createLink = async (req: Request, res: Response): Promise<any> => {
     const userId = (req as any).user.id;
     const hash = crypto.randomBytes(6).toString("hex");
 
-    console.log("Generating hash:", hash);
-    console.log("User ID:", userId);
-
+    
     const newLink = new link({
       hash,
       userId,
@@ -36,7 +34,6 @@ export const getLink = async (req: Request, res: Response): Promise<any> => {
     const { hash } = req.params;
     console.log("Received hash:", hash);
 
-    // Use the imported link model directly instead of trying to get it from mongoose
     const sharedLink = await link.findOne({ hash });
     console.log("Fetched link from DB:", sharedLink);
 
@@ -45,12 +42,14 @@ export const getLink = async (req: Request, res: Response): Promise<any> => {
       return res.status(404).json({ message: "Link not found" });
     }
 
-    // Find content associated with the user ID in the link
-    const getContent = await content.findOne({ userId: sharedLink.userId });
+    
+    const getContent = await content.find({ userId: sharedLink.userId });
     console.log("Fetched content:", getContent);
 
-    if (!getContent) {
-      return res.status(404).json({ message: "Content not found" });
+    if (!getContent || getContent.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No content found for this user" });
     }
 
     res.status(200).json(getContent);

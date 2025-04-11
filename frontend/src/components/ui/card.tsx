@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 
 interface CardProps {
   _id: string;
@@ -22,14 +22,15 @@ const extractYouTubeID = (url: string) => {
   return match ? match[1] : null;
 };
 
-// Function to check if image URL is valid before rendering
-const preloadImage = (src: string): Promise<boolean> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(true);
-    img.onerror = () => resolve(false);
-    img.src = src;
-  });
+// Get domain from URL for placeholder
+const getDomainFromUrl = (url?: string) => {
+  if (!url) return "";
+  try {
+    const domain = new URL(url).hostname.replace("www.", "");
+    return domain.split(".")[0].charAt(0).toUpperCase();
+  } catch {
+    return "";
+  }
 };
 
 export const Card: React.FC<CardProps> = ({
@@ -43,35 +44,6 @@ export const Card: React.FC<CardProps> = ({
   onDelete,
 }) => {
   const youtubeID = link ? extractYouTubeID(link) : null;
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string | null>(image || null);
-
-  // Pre-check if the image is valid when component mounts or image URL changes
-  useEffect(() => {
-    if (image) {
-      setImageLoaded(false);
-      preloadImage(image).then((success) => {
-        if (!success) {
-          console.error("Failed to load image:", image);
-          setImageError(true);
-          // Try with CORS proxy if direct loading fails
-          if (image.startsWith("https://")) {
-            // Replace with your CORS proxy if available
-            const proxyUrl = `https://cors-anywhere.herokuapp.com/${image}`;
-            return preloadImage(proxyUrl).then((proxySuccess) => {
-              if (proxySuccess) {
-                setImageUrl(proxyUrl);
-                setImageError(false);
-              }
-            });
-          }
-        } else {
-          setImageError(false);
-        }
-      });
-    }
-  }, [image]);
 
   // Function to handle delete
   const handleDelete = (e: React.MouseEvent) => {
@@ -88,61 +60,37 @@ export const Card: React.FC<CardProps> = ({
     }
   };
 
-  // Function to handle image error
-  const handleImageError = () => {
-    console.error("Image failed to load:", image);
-    setImageError(true);
-    setImageLoaded(false);
-  };
-
-  // Get domain from URL for placeholder
-  const getDomainFromUrl = (url?: string) => {
-    if (!url) return "";
-    try {
-      const domain = new URL(url).hostname.replace("www.", "");
-      return domain.split(".")[0].charAt(0).toUpperCase();
-    } catch (e) {
-      return "";
-    }
-  };
-
-  // Function to render image with fallback
+  // Simplified image rendering
   const renderImage = () => {
-    if (!imageUrl || imageError) {
+    if (!image) {
       return (
-        <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg">
-          <div className="text-center p-4">
-            <div className="bg-gray-200 rounded-full w-12 h-12 mx-auto mb-2 flex items-center justify-center">
-              <span className="text-gray-500 text-xl font-semibold">
-                {getDomainFromUrl(link) || title.charAt(0)}
-              </span>
-            </div>
-            <p className="text-sm text-gray-500">Image unavailable</p>
-          </div>
+        <div className="flex items-center justify-center w-full h-full bg-gray-50 text-gray-400">
+          <span className="text-4xl font-bold">
+            {getDomainFromUrl(link) || "?"}
+          </span>
         </div>
       );
     }
 
     return (
-      <div className="relative w-full h-full">
-        {!imageLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
-          </div>
-        )}
-        <img
-          src={imageUrl}
-          alt={title}
-          className={`w-full h-full object-contain transition-opacity duration-300 ${
-            imageLoaded ? "opacity-100" : "opacity-0"
-          }`}
-          onLoad={() => setImageLoaded(true)}
-          onError={handleImageError}
-          crossOrigin="anonymous"
-          referrerPolicy="no-referrer"
-          loading="lazy"
-        />
-      </div>
+      <img
+        src={image}
+        alt={title}
+        className="w-full h-full object-contain"
+        onError={(e) => {
+          // Fallback to placeholder on error
+          e.currentTarget.onerror = null; // Prevent infinite loop
+          e.currentTarget.style.display = "none";
+          e.currentTarget.parentElement!.innerHTML = `
+            <div class="flex items-center justify-center w-full h-full bg-gray-50 text-gray-400">
+              <span class="text-4xl font-bold">
+                ${getDomainFromUrl(link) || "?"}
+              </span>
+            </div>
+          `;
+        }}
+        loading="lazy"
+      />
     );
   };
 
@@ -174,7 +122,6 @@ export const Card: React.FC<CardProps> = ({
                 <video
                   controls
                   className="w-full h-full object-cover rounded-lg"
-                  onError={(e) => console.error("Video failed to load:", e)}
                 >
                   <source src={link} type="video/mp4" />
                   Your browser does not support the video tag.
@@ -183,7 +130,7 @@ export const Card: React.FC<CardProps> = ({
             );
           }
         }
-        if (imageUrl) {
+        if (image) {
           return (
             <div className="aspect-video w-full overflow-hidden rounded-lg">
               {renderImage()}
@@ -193,7 +140,7 @@ export const Card: React.FC<CardProps> = ({
         break;
 
       case "socialPost":
-        if (imageUrl) {
+        if (image) {
           return (
             <div className="w-full aspect-video overflow-hidden rounded-lg bg-gray-50">
               {renderImage()}
@@ -202,15 +149,12 @@ export const Card: React.FC<CardProps> = ({
         } else if (link) {
           return (
             <div className="w-full aspect-video overflow-hidden rounded-lg border bg-gray-50">
-              <iframe
+              <img
                 src={link}
-                title="Embedded Article"
-                className="w-full h-full border-0"
-                loading="lazy"
-                sandbox="allow-scripts allow-same-origin"
-                referrerPolicy="no-referrer"
-                onError={(e) => console.error("iFrame failed to load:", e)}
-              />
+                alt="Social Post"
+                className="w-full h-full object-cover rounded-lg"
+                />
+
             </div>
           );
         }
@@ -225,11 +169,10 @@ export const Card: React.FC<CardProps> = ({
                 title="PDF Document"
                 className="w-full h-full rounded-lg border"
                 loading="lazy"
-                onError={(e) => console.error("Document failed to load:", e)}
               ></iframe>
             </div>
           );
-        } else if (imageUrl) {
+        } else if (image) {
           return (
             <div className="w-full aspect-[4/3] overflow-hidden rounded-lg">
               {renderImage()}
@@ -240,7 +183,7 @@ export const Card: React.FC<CardProps> = ({
 
       case "Notes":
       default:
-        if (imageUrl) {
+        if (image) {
           return (
             <div className="relative w-full aspect-video overflow-hidden rounded-lg bg-gray-50">
               {renderImage()}

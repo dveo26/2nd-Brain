@@ -10,7 +10,9 @@ import { Sidebar } from "./components/ui/sidebar";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import Home from "./pages/Home";
+ // Import the actual SharedContent component
 import { AnimatePresence, motion } from "framer-motion";
+import SharedContent from "./pages/sharedContent";
 
 // Wrapper component to handle animations
 const AnimatedRoutes = () => {
@@ -21,9 +23,6 @@ const AnimatedRoutes = () => {
   );
 
   // Check for authentication token on component mount
-  // In App.tsx, modify the AnimatedRoutes component:
-
-  // Check if user is authenticated with a dependency on localStorage
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("token");
@@ -40,6 +39,7 @@ const AnimatedRoutes = () => {
   }, []);
 
   const isAuthPage = ["/login", "/signup"].includes(location.pathname);
+  const isSharedContentPage = location.pathname.includes("/shared/");
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -54,9 +54,8 @@ const AnimatedRoutes = () => {
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Sidebar - Only show if authenticated and not on auth pages */}
-
-      {isAuthenticated && !isAuthPage && (
+      {/* Sidebar - Only show if authenticated and not on auth pages or shared content page */}
+      {isAuthenticated && !isAuthPage && !isSharedContentPage && (
         <motion.div
           initial={{ x: -300, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -67,14 +66,14 @@ const AnimatedRoutes = () => {
             isAuthenticated={isAuthenticated}
             activeContentType={activeContentType}
             onFilterChange={handleFilterChange}
-            onLogout={handleLogout} // Add this prop
+            onLogout={handleLogout}
           />
         </motion.div>
       )}
       {/* Main Content */}
       <motion.div
         className={`flex-1 ${
-          isAuthenticated && !isAuthPage ? "ml-64" : ""
+          isAuthenticated && !isAuthPage && !isSharedContentPage ? "ml-64" : ""
         } p-6 overflow-y-auto`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -120,27 +119,12 @@ const AnimatedRoutes = () => {
                 }
               />
               <Route path="/shared/:hash" element={<SharedContent />} />
-              <Route path="" element={<Navigate to="/" />} />
+              <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </motion.div>
         </AnimatePresence>
       </motion.div>
     </div>
-  );
-};
-
-// Placeholder for SharedContent component with animations
-const SharedContent: React.FC = () => {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="p-6 bg-white rounded-lg shadow-sm"
-    >
-      <h1 className="text-2xl font-semibold mb-4">Shared Content</h1>
-      <p className="text-gray-600">Loading shared content...</p>
-    </motion.div>
   );
 };
 

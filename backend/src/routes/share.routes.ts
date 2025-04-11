@@ -1,6 +1,6 @@
 import { authenticator } from "../middleware/authMiddleware";
 import { Router } from "express";
-import { createLink, getLink } from "../controllers/share.controller";
+import { createLink, getLink} from "../controllers/share.controller";
 
 const router = Router();
 
