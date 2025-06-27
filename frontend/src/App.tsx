@@ -74,7 +74,7 @@ const AnimatedRoutes = () => {
       <motion.div
         className={`flex-1 ${
           isAuthenticated && !isAuthPage && !isSharedContentPage ? "ml-64" : ""
-        } p-6 overflow-y-auto`}
+        } overflow-y-auto`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.2 }}

@@ -23,10 +23,7 @@ interface HomeProps {
   setActiveContentType?: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-const Home: React.FC<HomeProps> = ({
-  activeContentType,
- 
-}) => {
+const Home: React.FC<HomeProps> = ({ activeContentType }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const [contentStats, setContentStats] = useState({
@@ -145,7 +142,7 @@ const Home: React.FC<HomeProps> = ({
           {/* Show login/signup message if not logged in */}
           {!isLoggedIn && (
             <motion.div
-              className="flex flex-col items-center justify-center min-h-screen py-12 bg-gradient-to-br from-indigo-100 via-white to-indigo-200"
+              className="flex flex-col items-center justify-center min-h-screen py-12 bg-gradient-to-br from-indigo-200 via-white to-indigo-400 relative overflow-hidden"
               initial="hidden"
               animate="visible"
               variants={{
@@ -156,9 +153,20 @@ const Home: React.FC<HomeProps> = ({
                 },
               }}
             >
+              {/* Decorative SVG background */}
+              <svg
+                className="absolute top-0 left-0 w-full h-64 opacity-20"
+                viewBox="0 0 1440 320"
+              >
+                <path
+                  fill="#6366f1"
+                  fillOpacity="1"
+                  d="M0,160L60,170.7C120,181,240,203,360,197.3C480,192,600,160,720,133.3C840,107,960,85,1080,101.3C1200,117,1320,171,1380,197.3L1440,224L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"
+                ></path>
+              </svg>
               {/* Hero Section */}
               <motion.div
-                className="flex flex-col items-center text-center mb-12"
+                className="flex flex-col items-center text-center mb-16 z-10"
                 initial="hidden"
                 animate="visible"
                 variants={{
@@ -169,7 +177,7 @@ const Home: React.FC<HomeProps> = ({
                 }}
               >
                 <motion.h1
-                  className="text-6xl font-extrabold text-indigo-900 mb-4 drop-shadow-lg"
+                  className="text-6xl md:text-7xl font-extrabold text-indigo-900 mb-4 drop-shadow-lg"
                   variants={{
                     hidden: { opacity: 0, y: 40 },
                     visible: {
@@ -182,7 +190,7 @@ const Home: React.FC<HomeProps> = ({
                   Second Brain
                 </motion.h1>
                 <motion.p
-                  className="text-2xl text-indigo-700 mb-8 max-w-xl mx-auto"
+                  className="text-2xl md:text-3xl text-indigo-700 mb-10 max-w-2xl mx-auto"
                   variants={{
                     hidden: { opacity: 0, y: 30 },
                     visible: {
@@ -196,7 +204,7 @@ const Home: React.FC<HomeProps> = ({
                   and access your ideas from anywhere.
                 </motion.p>
                 <motion.div
-                  className="flex gap-6 justify-center"
+                  className="flex gap-8 justify-center mb-8"
                   variants={{
                     hidden: { opacity: 0, y: 20 },
                     visible: {
@@ -213,8 +221,8 @@ const Home: React.FC<HomeProps> = ({
                     <Button
                       variant="primary"
                       size="lg"
-                      text="Login"
-                      onClick={() => navigate("/login")}
+                      text="Get Started"
+                      onClick={() => navigate("/signup")}
                     />
                   </motion.div>
                   <motion.div
@@ -224,16 +232,16 @@ const Home: React.FC<HomeProps> = ({
                     <Button
                       variant="secondary"
                       size="lg"
-                      text="Sign Up"
-                      onClick={() => navigate("/signup")}
+                      text="Login"
+                      onClick={() => navigate("/login")}
                     />
                   </motion.div>
                 </motion.div>
               </motion.div>
 
-              {/* Feature Highlights */}
+              {/* Features Section (keep existing) */}
               <motion.div
-                className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mt-8"
+                className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mt-8 z-10"
                 initial="hidden"
                 animate="visible"
                 variants={{
@@ -372,6 +380,123 @@ const Home: React.FC<HomeProps> = ({
                   </p>
                 </motion.div>
               </motion.div>
+
+              {/* How It Works Section */}
+              <section className="w-full max-w-5xl mt-20 z-10">
+                <h2 className="text-3xl font-bold text-indigo-900 text-center mb-10">
+                  How It Works
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="bg-white rounded-xl shadow-md p-8 flex flex-col items-center">
+                    <div className="bg-indigo-100 p-4 rounded-full mb-4">
+                      <svg
+                        className="w-8 h-8 text-indigo-600"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 text-indigo-900">
+                      1. Sign Up
+                    </h3>
+                    <p className="text-gray-600 text-center">
+                      Create your free account in seconds and start building
+                      your second brain.
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-md p-8 flex flex-col items-center">
+                    <div className="bg-indigo-100 p-4 rounded-full mb-4">
+                      <svg
+                        className="w-8 h-8 text-indigo-600"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 text-indigo-900">
+                      2. Organize
+                    </h3>
+                    <p className="text-gray-600 text-center">
+                      Add notes, links, and documents. Tag and filter your
+                      content for easy access.
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-md p-8 flex flex-col items-center">
+                    <div className="bg-indigo-100 p-4 rounded-full mb-4">
+                      <svg
+                        className="w-8 h-8 text-indigo-600"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0018 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 text-indigo-900">
+                      3. Access Anywhere
+                    </h3>
+                    <p className="text-gray-600 text-center">
+                      Your knowledge is always available, on any device,
+                      whenever you need it.
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              {/* Testimonials Section */}
+              <section className="w-full max-w-5xl mt-20 z-10">
+                <h2 className="text-3xl font-bold text-indigo-900 text-center mb-10">
+                  What Our Users Say
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center">
+                    <p className="text-gray-700 italic mb-4">
+                      "Second Brain has completely changed the way I organize my
+                      thoughts. Highly recommended!"
+                    </p>
+                    <span className="font-semibold text-indigo-700">
+                      — Alex P.
+                    </span>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center">
+                    <p className="text-gray-700 italic mb-4">
+                      "Sharing my notes with my team is now effortless. The best
+                      productivity tool I've used."
+                    </p>
+                    <span className="font-semibold text-indigo-700">
+                      — Jamie L.
+                    </span>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center">
+                    <p className="text-gray-700 italic mb-4">
+                      "I love how I can access my knowledge base from anywhere.
+                      The UI is beautiful and easy to use."
+                    </p>
+                    <span className="font-semibold text-indigo-700">
+                      — Morgan S.
+                    </span>
+                  </div>
+                </div>
+              </section>
             </motion.div>
           )}
 
