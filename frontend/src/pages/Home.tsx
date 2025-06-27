@@ -4,8 +4,6 @@ import ContentContainer from "../components/ui/contentContainer";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import { motion } from "framer-motion";
-
-// Define the ContentItem type
 export interface ContentItem {
   _id: string;
   title: string;
@@ -614,47 +612,6 @@ const Home: React.FC<HomeProps> = ({ activeContentType }) => {
           )}
         </motion.div>
       </main>
-
-      {/* Footer */}
-      <footer className="w-full bg-white/80 backdrop-blur-md shadow-inner mt-12">
-        <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-4 text-gray-600 text-sm">
-          <div className="flex items-center gap-2">
-            <svg
-              className="w-5 h-5 text-indigo-700"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 6v6l4 2"
-              />
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                fill="none"
-              />
-            </svg>
-            <span>Second Brain &copy; {new Date().getFullYear()}</span>
-          </div>
-          <div className="flex gap-4">
-            <a href="#" className="hover:underline">
-              About
-            </a>
-            <a href="#" className="hover:underline">
-              Contact
-            </a>
-            <a href="#" className="hover:underline">
-              Privacy
-            </a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

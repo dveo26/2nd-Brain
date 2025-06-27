@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import api from "../api";
 
@@ -107,9 +107,9 @@ const Signup: React.FC<{ setIsAuthenticated: (value: boolean) => void }> = ({
           <div className="mt-4 text-center">
             <p className="text-gray-600">
               already have an account?{" "}
-              <a href="/login" className="text-indigo-600 hover:underline">
+              <Link to="/login" className="text-indigo-600 hover:underline">
                 login
-              </a>
+              </Link>
             </p>
           </div>
         </div>

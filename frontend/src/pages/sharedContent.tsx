@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import api from "../api";
 import { Card } from "../components/ui/card";
 import { motion } from "framer-motion";
@@ -24,7 +24,6 @@ const SharedContent: React.FC = () => {
   const [content, setContent] = useState<SharedContentData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
 
   useEffect(() => {
     const fetchSharedContent = async () => {
@@ -34,7 +33,7 @@ const SharedContent: React.FC = () => {
         setIsLoading(true);
         const response = await api.get(`/share/link/${hash}`);
         if (response.status === 200) {
-          setContent(response.data); 
+          setContent(response.data);
           setError(null);
         } else {
           setError("Failed to load content.");
@@ -90,12 +89,12 @@ const SharedContent: React.FC = () => {
             {error ||
               "The content you're looking for couldn't be found or has been removed."}
           </p>
-          <a
-            href="/"
+          <Link
+            to="/"
             className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
           >
             Go to Homepage
-          </a>
+          </Link>
         </div>
       </motion.div>
     );
