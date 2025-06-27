@@ -10,7 +10,7 @@ import { Sidebar } from "./components/ui/sidebar";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import Home from "./pages/Home";
- // Import the actual SharedContent component
+// Import the actual SharedContent component
 import { AnimatePresence, motion } from "framer-motion";
 import SharedContent from "./pages/sharedContent";
 

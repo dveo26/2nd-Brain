@@ -25,8 +25,8 @@ const Login: React.FC<{ setIsAuthenticated: (value: boolean) => void }> = ({
       // Navigate to the home page
       navigate("/");
     } catch (error) {
-        setError("Login failed. Please check your credentials and try again.");
-        console.error("Login failed", error);
+      setError("Login failed. Please check your credentials and try again.");
+      console.error("Login failed", error);
     }
   };
 
@@ -67,7 +67,6 @@ const Login: React.FC<{ setIsAuthenticated: (value: boolean) => void }> = ({
         </div>
       </div>
     </div>
-  
   );
 };
 

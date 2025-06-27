@@ -16,7 +16,7 @@ const Signup: React.FC<{ setIsAuthenticated: (value: boolean) => void }> = ({
 
   const handleRequestOTP = async () => {
     try {
-      console.log("Making request to:", ); // Debugging
+      console.log("Making request to:"); // Debugging
       const response = await api.post("/auth/request-otp", { email });
       console.log("OTP Response:", response.data); // Debugging
       setOtpSent(true);
@@ -46,8 +46,8 @@ const Signup: React.FC<{ setIsAuthenticated: (value: boolean) => void }> = ({
       // Navigate to the home page
       navigate("/");
     } catch (error) {
-        setError("Signup failed. Please check your details and try again.");
-        console.error("Signup failed", error);
+      setError("Signup failed. Please check your details and try again.");
+      console.error("Signup failed", error);
     }
   };
 
