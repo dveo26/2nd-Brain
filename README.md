@@ -5,3 +5,5 @@ setup step:
 2.install all node dependencies
 3.install typescript
 4.ensure that you install types for the dependencies
+
+link: https://brainly-2nd-brain.netlify.app/
